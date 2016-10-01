@@ -5,6 +5,6 @@ server.get("/", function(req, res) {
   res.end("Hello World");
 });
 
-server.listen(808, function() {
+server.listen(80, function() {
   console.log("listening");
 })
