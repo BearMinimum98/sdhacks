@@ -1,2 +1,5 @@
 ```npm install express
-npm install irc```
+
+npm install tmi.js --save```
+
+
