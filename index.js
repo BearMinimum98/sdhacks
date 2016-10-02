@@ -49,6 +49,38 @@ function init() {
       // PM
       console.log(message);
       if (message == "PLS IM SO LONELY") {
+        connection.query('SELECT * FROM sdhacks;', function(err, rows, fields) {
+          if (err) throw err;
+
+          connection.query('SELECT * FROM sdhacks WHERE user = "' + user + '";', function(err, rows2, fields) {
+            if (rows2.length > 0) {
+              var userFollows = rows2[0].following.split(",");
+              var biggestFollowing = 0;
+              var biggestFollowingUsername = "";
+
+              rows.forEach(function(row) {
+                if (row.username != rows2[0].username) {
+                  var counter = 0;
+
+                  userFollows.forEach(function(userFollow) {
+                    if (row.indexOf(userFollow) != -1) {
+                      counter++;
+                    }
+                  });
+
+                  if (biggestFollowing < counter) {
+                    biggestFollowing = counter;
+                    biggestFollowingUsername = row.username;
+                  }
+                }
+              });
+
+              // return biggest
+            }
+          });
+
+          console.log('The solution is: ', rows[0].solution);
+        });
        // find partner
       }
     } else if (user["message-type"] == "chat") {
