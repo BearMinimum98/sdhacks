@@ -4,10 +4,11 @@ var tmi = require('tmi.js');
 
 var mysql = require('mysql');
 var connection = mysql.createConnection({
-    host: "localhost",
+    host: "127.0.0.1",
     port: 3306,
-    username: "sdhacks",
-    password: "sdhacks"
+    user: "sdhacks",
+    password: "sdhacks",
+    database: "default"
 })
 
 server.get("/", function(req, res) {
