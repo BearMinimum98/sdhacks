@@ -54,9 +54,24 @@ function init() {
     } else if (user["message-type"] == "chat") {
       // chat message
       console.log(message);
+      var following;
+      // GET followed streams of current user when they enroll
       if (message == "!enroll") {
+        client.api({
+          url: "https://api.twitch.tv/kraken/user",
+          method: "GET /streams/followed",
+          headers: {
+            "Accept": "application/vnd.twitchtv.v3+json",
+            "Authorization": "OAuth 3eb787117110834e079932bedfb8e6a7",
+            "Client-ID": "1dac77895e8f56fa1a71e7c43ef09d87"
+          }
+        }, function(err, res, body) {
+            console.log(body);
+            following = body["streams"];
+        });
         // PULL user info, stick into mySQL, send message back
-
+        connection.query("INSERT INTO sdhacks (username, following) VALUES (" +
+          connection.escape(user) + ", " + connection.escape(following)+ ")");
       }
     }
   });
