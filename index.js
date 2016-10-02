@@ -49,11 +49,12 @@ function init() {
       // PM
       console.log(message);
       if (message == "match me") {
+        console.log("matching");
         connection.query('SELECT * FROM sdhacks;', function(err, rows, fields) {
           if (err) throw err;
-
-          connection.query('SELECT * FROM sdhacks WHERE user = "' + user + '";', function(err, rows2, fields) {
-            if (rows2.length > 0) {
+          console.log('SELECT * FROM sdhacks WHERE username = "' + user.username + '";');
+          connection.query('SELECT * FROM sdhacks WHERE username = "' + user.username + '";', function(err, rows2, fields) {
+            if (rows2 && rows2.length > 0) {
               var userFollows = rows2[0].following.split(",");
               var biggestFollowing = 0;
               var biggestFollowingUsername = "";
@@ -63,7 +64,8 @@ function init() {
                   var counter = 0;
 
                   userFollows.forEach(function(userFollow) {
-                    if (row.indexOf(userFollow) != -1) {
+                    console.log(row.following);
+                    if (row.following.indexOf(userFollow) != -1) {
                       counter++;
                     }
                   });
@@ -76,10 +78,16 @@ function init() {
               });
 
               if (biggestFollowing > 0) {
-                client.whisper(rows2[0].username, "Your best match is " + biggestFollowingUsername + " with a " + biggestFollowing / userFollows.length);
+                client.whisper(rows2[0].username, "Your best match is " + biggestFollowingUsername + " with a " + (biggestFollowing / userFollows.length * 100) + "% match strength");
               } else {
                 client.whisper(rows2[0].username, "You did not have any matches. Sorry.");
               }
+            } else {
+              // console.log("enroll first");
+              // console.log(user.username);
+              client.whisper(user.username, "Please !enroll in chat first.").catch(function(err) {
+                throw err;
+              });
             }
           });
         });
@@ -88,24 +96,32 @@ function init() {
     } else if (user["message-type"] == "chat") {
       // chat message
       console.log(message);
-      var following;
+      var following = new Array();
       // GET followed streams of current user when they enroll
       if (message == "!enroll") {
         client.api({
-          url: "https://api.twitch.tv/kraken/user",
-          method: "GET /streams/followed",
+          url: "https://api.twitch.tv/kraken/users/" + user.username + "/follows/channels",
+          method: "GET",
           headers: {
             "Accept": "application/vnd.twitchtv.v3+json",
-            "Authorization": "OAuth 3eb787117110834e079932bedfb8e6a7",
-            "Client-ID": "1dac77895e8f56fa1a71e7c43ef09d87"
+            "Authorization": "OAuth m4hjanfsfjrexi5nyrw20ofdvo6s3d",
+            "Client-ID": "kulwfkh2h6utqnc916kraui298qgwrj"
           }
         }, function(err, res, body) {
+            // console.log(body["streams"][0].channel);
             console.log(body);
-            following = body["streams"];
+            body["follows"].forEach(function(stream) {
+              following.push(stream.channel.name);
+            });
+            try {
+              connection.query("DELETE FROM sdhacks WHERE username='" + user.username +"';");
+            } catch (e) {}
+            connection.query("INSERT INTO sdhacks (username, following) VALUES (" + connection.escape(user.username) + ", " + connection.escape(following.join(","))+ ")");
+            client.say("kevzho", user.username + ", you have been enrolled! PM me 'match me' to match with someone.");
         });
         // PULL user info, stick into mySQL, send message back
-        connection.query("INSERT INTO sdhacks (username, following) VALUES (" +
-          connection.escape(user) + ", " + connection.escape(following)+ ")");
+        // connection.query("INSERT INTO sdhacks (username, following) VALUES (" +
+        //   connection.escape(user) + ", " + connection.escape(following.join(","))+ ")");
       }
     }
   });
