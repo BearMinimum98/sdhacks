@@ -2,13 +2,22 @@ var express = require('express');
 var server = express();
 var tmi = require('tmi.js');
 
+var mysql = require('mysql');
+var connection = mysql.createConnection({
+    host: "localhost",
+    port: 3306,
+    username: "sdhacks",
+    password: "sdhacks"
+})
+
 server.get("/", function(req, res) {
   res.end("Hello World");
 });
 
 server.listen(80, function() {
   console.log("listening");
-})
+});
+
 var client = new tmi.client({
   identity: {
     username: 'kevzho',
@@ -26,16 +35,31 @@ function check() {
 }
 function init() {
   console.log("init called");
+  connection.connect(function(err) {
+    if (err == null) {
+      console.log("success");
+    } else {
+      console.log(err);
+    }
+  });
   client.on("message", function(channel, user, message, self) {
     if (self) return;
     if (user["message-type"] == "whisper") {
       // PM
       console.log(message);
+      if (message == "PLS IM SO LONELY") {
+       // find partner
+      }
     } else if (user["message-type"] == "chat") {
       // chat message
       console.log(message);
+      if (message == "!enroll") {
+        // PULL user info, stick into mySQL, send message back
+
+      }
     }
   });
+
   // client.on("chat", function (channel, user, message, self) {
   //     // Don't listen to my own messages..
   //     if (self) return;
