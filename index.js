@@ -48,7 +48,7 @@ function init() {
     if (user["message-type"] == "whisper") {
       // PM
       console.log(message);
-      if (message == "PLS IM SO LONELY") {
+      if (message == "match me") {
         connection.query('SELECT * FROM sdhacks;', function(err, rows, fields) {
           if (err) throw err;
 
@@ -75,11 +75,13 @@ function init() {
                 }
               });
 
-              // return biggest
+              if (biggestFollowing > 0) {
+                client.whisper(rows2[0].username, "Your best match is " + biggestFollowingUsername + " with a " + biggestFollowing / userFollows.length);
+              } else {
+                client.whisper(rows2[0].username, "You did not have any matches. Sorry.");
+              }
             }
           });
-
-          console.log('The solution is: ', rows[0].solution);
         });
        // find partner
       }
